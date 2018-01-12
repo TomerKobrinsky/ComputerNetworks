@@ -54,37 +54,37 @@ public class IdcDm {
             TokenBucket tokenBucket = new TokenBucket();
             RateLimiter rateLimiter = new RateLimiter(tokenBucket, maxBytesPerSecond);
             rateLimiter.run();
-        }
-        URL firstUrl = null;
-        try {
-            firstUrl = new URL(url);
-        } catch (MalformedURLException e) {
-            System.err.println("problem with url" + e);
-        }
-        URLConnection urlConnection1 = null;
-        try {
-            urlConnection1 = firstUrl.openConnection();
-        } catch (IOException e) {
-            System.err.println("problem with opening connection" + e);
-        }
-        long totalBytes = urlConnection1.getContentLength();
-        long threadBytes = totalBytes / numberOfWorkers;
-        long curStart = 0;
-        Thread[] threads = new Thread[numberOfWorkers];
-        long parentThreadId = Thread.currentThread().getId();
+            URL firstUrl = null;
+            try {
+                firstUrl = new URL(url);
+            } catch (MalformedURLException e) {
+                System.err.println("problem with url" + e);
+            }
+            URLConnection urlConnection1 = null;
+            try {
+                urlConnection1 = firstUrl.openConnection();
+            } catch (IOException e) {
+                System.err.println("problem with opening connection" + e);
+            }
+            long totalBytes = urlConnection1.getContentLength();
+            long threadBytes = totalBytes / numberOfWorkers;
+            long curStart = 0;
+            Thread[] threads = new Thread[numberOfWorkers];
+            long parentThreadId = Thread.currentThread().getId();
 
-        for (int i = 0; i < numberOfWorkers; i++) {
-            Range range = new Range(curStart, curStart + threadBytes);
-            curStart += threadBytes;
-            HTTPRangeGetter httpRangeGetter = new HTTPRangeGetter(url, range, );
+            for (int i = 0; i < numberOfWorkers; i++) {
+                Range range = new Range(curStart, curStart + threadBytes);
+                curStart += threadBytes;
+                HTTPRangeGetter httpRangeGetter = new HTTPRangeGetter(url, range, blockingQueue, tokenBucket);
 
-            threads[i] = new Thread();
-            if (parentThreadId != Thread.currentThread().getId()) {
-                threads[i].start();
+                threads[i] = new Thread();
+                if (parentThreadId != Thread.currentThread().getId()) {
+                    threads[i].start();
+                }
+
             }
 
         }
-
     }
 
 }
