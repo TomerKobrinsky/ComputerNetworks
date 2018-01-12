@@ -12,23 +12,43 @@
  */
 class TokenBucket {
 
-    TokenBucket() {
-        //TODO
-    }
+    Boolean isBucketFull;
+    Long tokensLeftToTake;
 
+    TokenBucket() {
+        isBucketFull = false;
+        tokensLeftToTake = 0L;
+    }
+// remove tokens from the bucket (blocks until n tokens are available and taken)
     void take(long tokens) {
-        //TODO
+        // if tokens is bigger than tokensLeftToTake thread is waiting
+        while (tokens > tokensLeftToTake)
+        {
+            try {
+               Thread.currentThread().sleep(1000);
+            } catch (InterruptedException e) {
+                System.err.println("err message: " + e + ", problem waiting with the tread. Download Failed");
+            }
+        }
+        tokensLeftToTake -= tokens;
     }
 
     void terminate() {
-        //TODO
+        this.isBucketFull = true;
+
     }
 
     boolean terminated() {
-        //TODO
+        return  isBucketFull;
     }
 
     void set(long tokens) {
-        //TODO
+        this.tokensLeftToTake = tokens;
+    }
+
+// return the number off tokens left to take
+    long getTokensLeftToTake ()
+    {
+        return tokensLeftToTake;
     }
 }

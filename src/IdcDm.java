@@ -1,3 +1,7 @@
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLConnection;
 import java.util.concurrent.*;
 
 public class IdcDm {
@@ -45,6 +49,45 @@ public class IdcDm {
      * @param maxBytesPerSecond limit on download bytes-per-second
      */
     private static void DownloadURL(String url, int numberOfWorkers, Long maxBytesPerSecond) {
-        //TODO
+        LinkedBlockingQueue blockingQueue = new LinkedBlockingQueue();
+        if (maxBytesPerSecond != null) {
+            TokenBucket tokenBucket = new TokenBucket();
+            RateLimiter rateLimiter = new RateLimiter(tokenBucket, maxBytesPerSecond);
+            rateLimiter.run();
+        }
+        URL firstUrl = null;
+        try {
+            firstUrl = new URL(url);
+        } catch (MalformedURLException e) {
+            System.err.println("problem with url" + e);
+        }
+        URLConnection urlConnection1 = null;
+        try {
+            urlConnection1 = firstUrl.openConnection();
+        } catch (IOException e) {
+            System.err.println("problem with opening connection" + e);
+        }
+        long totalBytes = urlConnection1.getContentLength();
+        long threadBytes = totalBytes / numberOfWorkers;
+        long curStart = 0;
+        Thread[] threads = new Thread[numberOfWorkers];
+        long parentThreadId = Thread.currentThread().getId();
+
+        for (int i = 0; i < numberOfWorkers; i++) {
+            Range range = new Range(curStart, curStart + threadBytes);
+            curStart += threadBytes;
+            HTTPRangeGetter httpRangeGetter = new HTTPRangeGetter(url, range, );
+
+            threads[i] = new Thread();
+            if (parentThreadId != Thread.currentThread().getId()) {
+                threads[i].start();
+            }
+
+        }
+
     }
+
 }
+
+
+

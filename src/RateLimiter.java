@@ -15,6 +15,13 @@ public class RateLimiter implements Runnable {
 
     @Override
     public void run() {
-        //TODO
+        while(!(tokenBucket.terminated())) {
+            tokenBucket.set(maxBytesPerSecond);
+            try {
+                Thread.currentThread().sleep(1000);
+            } catch (InterruptedException e) {
+                System.err.println("err message: " + e + ", problem waiting with the tread. Download Failed");
+            }
+        }
     }
 }
